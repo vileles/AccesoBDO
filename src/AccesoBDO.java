@@ -1,15 +1,34 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
+import java.util.Properties;
 import java.util.Scanner;
 
 public class AccesoBDO {
-    //Indicamos base de datos, usuario e contrasinal
+    //Indicamos base de datos, usuario y contraseña
     private static final String URL = "jdbc:mysql://localhost:3306/vuelos";
     private static final String USUARIO = "root";
-    private static final String CONTRASENA = "Valentino@12";
+    private static String CONTRASENA;
+    
+    static {
+    //Cargar la contraseña desde el archivo configuration.properties
+    Properties prop = new Properties();
+    try (FileInputStream input = new FileInputStream("C:/Users/alvar/OneDrive/Escritorio/Traballos FP/AccesoBDO/src/configuration.properties")) {
+            prop.load(input);
+            CONTRASENA = prop.getProperty("Contraseña");
+            System.out.println("Intentando cargar desde: " + new File("configuration.properties").getAbsolutePath());
+            System.out.println("Contraseña cargada: " + CONTRASENA);
+
+     } catch (IOException ex) {
+            ex.printStackTrace();
+            System.err.println("No se pudo cargar la contraseña. Asegúrate de que configuration.properties existe y contiene la contraseña.");
+        }
+    }
 
     public static void main(String[] args) {
         try {
-           //Establecemos conexión ca base de datos co método getConnection
+           //Establecemos conexión con la base de datos y con el método getConnection
             Connection conexion = DriverManager.getConnection(URL, USUARIO, CONTRASENA);
             Scanner scanner = new Scanner(System.in);
             
@@ -35,9 +54,9 @@ public class AccesoBDO {
 
                 switch (opcion) {
                     case 1:
-                        //Creamos o obxecto statement
+                        //Creamos el objeto statement
                         statement = conexion.createStatement();
-                        //Executamos a consulta
+                        //Ejecutamos la consulta
                         resultSet = statement.executeQuery("SELECT * FROM pasajeros");
                         ResultSetMetaData rsmd = resultSet.getMetaData();
                         int columnas = rsmd.getColumnCount();
@@ -55,9 +74,9 @@ public class AccesoBDO {
                             System.out.println("Tipo de la columna: " + rsmd.getColumnTypeName(i));
                             System.out.println("Precisión: " + rsmd.getPrecision(i));
                         }
-                        //Pechar ResultSet
+                        //Cerrar ResultSet
                         resultSet.close();
-                       //Pechar statement
+                       //Cerrar statement
                         statement.close();
                         
                         break;
@@ -174,7 +193,7 @@ public class AccesoBDO {
 
             } while (opcion != 0);
 
-            // Pechar conexión
+            // Cerrar conexión
             conexion.close();
             scanner.close();
 
